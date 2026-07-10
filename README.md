@@ -12,6 +12,11 @@ The project consists of several independent modules, entirely decoupled through 
 - **`mod_player`**: A dedicated player controller mod that reads `InputState` (Left/Right/Space) and translates it into physical `Velocity` vectors.
 - **`mod_game_loader`**: A structural mod that reads the `game.json` case file and injects `ecs_prefab` entities into the game world at startup.
 
+### Core Dependencies (Vendor)
+To make this repository 100% self-contained, the highly customized engine cores are bundled in the `libs/` directory:
+- **`libs/bevy_base`**: A stripped-down, customized version of Bevy's ECS and App components, tailored for this dynamic multi-DLL architecture.
+- **`libs/ecs_prefab`**: The JSON snapshot/deserialization library that injects entity hierarchies at runtime.
+
 ### Mod Loading via DLL
 The `game_runner` executable acts as a thin host. It:
 1. Reads `playset.toml`.

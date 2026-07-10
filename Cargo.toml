@@ -10,16 +10,16 @@ members = [
 ]
 
 [workspace.dependencies]
-bevy_app = { path = "../bevy_base/bevy_app" }
-bevy_ecs = { path = "../bevy_base/bevy_ecs" }
+bevy_app = { path = "libs/bevy_base/bevy_app" }
+bevy_ecs = { path = "libs/bevy_base/bevy_ecs" }
 shared_api = { path = "shared_api" }
-ecs_prefab = { path = "../ecs_prefab" }
+ecs_prefab = { path = "libs/ecs_prefab" }
 
 [patch.crates-io]
-bevy_ecs = { path = "../bevy_base/bevy_ecs" }
-bevy_ecs_macros = { path = "../bevy_base/bevy_ecs_macros" }
-bevy_app = { path = "../bevy_base/bevy_app" }
-bevy_macro_utils = { path = "../bevy_base/bevy_macro_utils" }
+bevy_ecs = { path = "libs/bevy_base/bevy_ecs" }
+bevy_ecs_macros = { path = "libs/bevy_base/bevy_ecs_macros" }
+bevy_app = { path = "libs/bevy_base/bevy_app" }
+bevy_macro_utils = { path = "libs/bevy_base/bevy_macro_utils" }
 
 [profile.dev.package."*"]
 opt-level = 3

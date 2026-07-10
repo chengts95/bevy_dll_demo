@@ -1,17 +1,42 @@
 #!/bin/bash
 set -e
 
-echo "==> Building Workspace..."
-cargo build
+BUILD_MODE="debug"
+CARGO_ARGS=""
 
-echo "==> Distributing DLLs to Mod Directories..."
-TARGET_DIR="/tmp/bevy_macroquad_target/debug"
+if [[ "$1" == "--release" ]]; then
+    BUILD_MODE="release"
+    CARGO_ARGS="--release"
+fi
 
-cp "$TARGET_DIR/libmod_canvas.so" "mods/mod_canvas/"
-cp "$TARGET_DIR/libmod_block.so" "mods/mod_block/"
-cp "$TARGET_DIR/libmod_physics.so" "mods/mod_physics/"
-cp "$TARGET_DIR/libmod_player.so" "mods/mod_player/"
-cp "$TARGET_DIR/libmod_game_loader.so" "mods/mod_game_loader/"
+echo "==> Building Workspace ($BUILD_MODE)..."
+cargo build $CARGO_ARGS
 
-echo "==> Running Game Runner..."
-cargo run --bin game_runner
+# Dynamically extract Cargo's target directory (handles overrides in .cargo/config.toml)
+CARGO_TARGET_DIR=$(cargo metadata --no-deps --format-version 1 | sed -n 's/.*"target_directory":"\([^"]*\)".*/\1/p')
+TARGET_DIR="$CARGO_TARGET_DIR/$BUILD_MODE"
+
+echo "==> Distributing DLLs based on playset.toml and mod.toml ($BUILD_MODE)..."
+
+for desc in $(grep 'descriptor' playset.toml | sed -E 's/.*descriptor = "(.*)".*/\1/'); do
+    MOD_DIR=$(dirname "$desc")
+    CRATE_NAME=$(basename "$MOD_DIR")
+    
+    if [[ "$BUILD_MODE" == "release" ]]; then
+        DLL_TARGET=$(grep -A 5 '\[platform.linux\]' "$desc" | grep 'dll_path_release' | head -n 1 | sed -E 's/.*= *"(.*)".*/\1/')
+    else
+        DLL_TARGET=$(grep -A 5 '\[platform.linux\]' "$desc" | grep 'dll_path_debug' | head -n 1 | sed -E 's/.*= *"(.*)".*/\1/')
+    fi
+    
+    # Fallback to default if not found
+    if [[ -z "$DLL_TARGET" ]]; then 
+        DLL_TARGET="lib${CRATE_NAME}.so"
+    fi
+    
+    SOURCE_DLL="$TARGET_DIR/lib${CRATE_NAME}.so"
+    echo "  -> Copying $SOURCE_DLL to $MOD_DIR/$DLL_TARGET"
+    cp "$SOURCE_DLL" "$MOD_DIR/$DLL_TARGET"
+done
+
+echo "==> Running Game Runner ($BUILD_MODE)..."
+cargo run --bin game_runner $CARGO_ARGS
