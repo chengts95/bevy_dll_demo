@@ -29,7 +29,8 @@ fn default_prefabs_dir() -> PathBuf { PathBuf::from("prefabs") }
 
 #[derive(Deserialize, Clone)]
 struct ModPlatform {
-    linux: ModDllPath,
+    linux: Option<ModDllPath>,
+    windows: Option<ModDllPath>,
 }
 
 #[derive(Deserialize, Clone)]
@@ -73,7 +74,13 @@ fn main() {
 
         // Load DLL
         let target_dir = if cfg!(debug_assertions) { "debug" } else { "release" };
-        let dll_name = if target_dir == "debug" { &manifest.platform.linux.dll_path_debug } else { &manifest.platform.linux.dll_path_release };
+        
+        #[cfg(target_os = "windows")]
+        let platform_cfg = manifest.platform.windows.as_ref().expect("Missing [platform.windows] in mod.toml");
+        #[cfg(target_os = "linux")]
+        let platform_cfg = manifest.platform.linux.as_ref().expect("Missing [platform.linux] in mod.toml");
+
+        let dll_name = if target_dir == "debug" { &platform_cfg.dll_path_debug } else { &platform_cfg.dll_path_release };
         
         // Correct distribution path: relative to the directory containing mod.toml
         let dll_path = mod_dir.join(dll_name);
