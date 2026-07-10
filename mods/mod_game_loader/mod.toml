@@ -1,0 +1,6 @@
+name = "Game Loader"
+version = "0.1.0"
+
+[platform.linux]
+dll_path_debug = "libmod_game_loader.so"
+dll_path_release = "libmod_game_loader.so"

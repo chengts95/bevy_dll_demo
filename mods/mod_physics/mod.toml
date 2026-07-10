@@ -1,0 +1,6 @@
+name = "Physics Engine"
+version = "0.1.0"
+
+[platform.linux]
+dll_path_debug = "libmod_physics.so"
+dll_path_release = "libmod_physics.so"

@@ -1,0 +1,25 @@
+[workspace]
+resolver = "2"
+members = [
+    "host",
+    "game_runner",
+    "shared_api",
+    "mods/mod_canvas",
+    "mods/mod_block",
+    "mods/mod_game_loader", "mods/mod_physics", "mods/mod_player",
+]
+
+[workspace.dependencies]
+bevy_app = { path = "../bevy_base/bevy_app" }
+bevy_ecs = { path = "../bevy_base/bevy_ecs" }
+shared_api = { path = "shared_api" }
+ecs_prefab = { path = "../ecs_prefab" }
+
+[patch.crates-io]
+bevy_ecs = { path = "../bevy_base/bevy_ecs" }
+bevy_ecs_macros = { path = "../bevy_base/bevy_ecs_macros" }
+bevy_app = { path = "../bevy_base/bevy_app" }
+bevy_macro_utils = { path = "../bevy_base/bevy_macro_utils" }
+
+[profile.dev.package."*"]
+opt-level = 3

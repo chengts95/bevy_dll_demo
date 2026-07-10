@@ -1,0 +1,6 @@
+name = "Canvas Renderer"
+version = "0.1.0"
+
+[platform.linux]
+dll_path_debug = "libmod_canvas.so"
+dll_path_release = "libmod_canvas.so"
