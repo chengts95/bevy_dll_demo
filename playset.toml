@@ -1,7 +1,13 @@
-mods = [
-    { descriptor = "mods/mod_canvas/mod.toml" },
-    { descriptor = "mods/mod_block/mod.toml" },
-    { descriptor = "mods/mod_physics/mod.toml" },
-    { descriptor = "mods/mod_player/mod.toml" },
-    { descriptor = "mods/mod_game_loader/mod.toml" }
-]
+name = "launcher"
+
+[[mods]]
+descriptor = "mods/mod_canvas/mod.toml"
+
+[[mods]]
+descriptor = "mods/mod_block/mod.toml"
+
+[[mods]]
+descriptor = "mods/mod_player/mod.toml"
+
+[[mods]]
+descriptor = "mods/mod_game_loader/mod.toml"

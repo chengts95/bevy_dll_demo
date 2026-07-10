@@ -7,6 +7,7 @@ members = [
     "mods/mod_canvas",
     "mods/mod_block",
     "mods/mod_game_loader", "mods/mod_physics", "mods/mod_player",
+    "launcher",
 ]
 
 [workspace.dependencies]

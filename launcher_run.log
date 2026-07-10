@@ -1,0 +1,55 @@
+warning: unused import: `bevy_ecs::prelude::Resource`
+ --> game_runner/src/main.rs:2:5
+  |
+2 | use bevy_ecs::prelude::Resource;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `std::collections::HashMap`
+ --> game_runner/src/main.rs:5:5
+  |
+5 | use std::collections::HashMap;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: field `windows` is never read
+  --> game_runner/src/main.rs:33:5
+   |
+31 | struct ModPlatform {
+   |        ----------- field in this struct
+32 |     linux: Option<ModDllPath>,
+33 |     windows: Option<ModDllPath>,
+   |     ^^^^^^^
+   |
+   = note: `ModPlatform` has a derived impl for the trait `Clone`, but this is intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `game_runner` (bin "game_runner") generated 3 warnings (run `cargo fix --bin "game_runner" -p game_runner` to apply 2 suggestions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.07s
+     Running `/tmp/bevy_macroquad_target/debug/game_runner`
+Game Runner: Loading Mod 'Canvas Renderer'
+Game Runner: Loading Mod 'Block Logic'
+Game Runner: Loading Mod 'Player Controller'
+Game Runner: Loading Mod 'Game Loader'
+Game Loader: Successfully spawned 3 instances via ecs_prefab!
+warning: queue 0x55637587f200 destroyed while proxies still attached:
+  wl_buffer#21 still attached
+  wl_buffer#20 still attached
+  wl_shm_pool#19 still attached
+  wl_buffer#18 still attached
+  wl_shm_pool#17 still attached
+  wl_surface#14 still attached
+  wl_shm_pool#16 still attached
+  zxdg_toplevel_decoration_v1#15 still attached
+  xdg_toplevel#13 still attached
+  xdg_surface#12 still attached
+  xdg_wm_base#11 still attached
+  wl_buffer#10 still attached
+  wl_shm_pool#9 still attached
+  wl_surface#8 still attached
+  wl_shm#7 still attached
+  wl_compositor#6 still attached
+  wl_pointer#5 still attached
+  wl_keyboard#4 still attached
+  wl_seat#3 still attached
+  wl_registry#2 still attached
