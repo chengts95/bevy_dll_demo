@@ -1,0 +1,13 @@
+[workspace]
+members = [
+    "bevy_app",
+    "bevy_ecs",
+    "bevy_ecs_macros",
+    "bevy_macro_utils"
+]
+
+[patch.crates-io]
+bevy_ecs = { path = "bevy_ecs" }
+bevy_ecs_macros = { path = "bevy_ecs_macros" }
+bevy_macro_utils = { path = "bevy_macro_utils" }
+bevy_app = { path = "bevy_app" }

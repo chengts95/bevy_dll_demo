@@ -1,0 +1,2 @@
+[build]
+target-dir = "/tmp/bevy_macroquad_target"
