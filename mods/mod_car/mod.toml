@@ -1,0 +1,10 @@
+name = "Car Controller"
+version = "0.1.0"
+
+[platform.linux]
+dll_path_debug = "libmod_car.so"
+dll_path_release = "libmod_car.so"
+
+[platform.windows]
+dll_path_debug = "mod_car.dll"
+dll_path_release = "mod_car.dll"

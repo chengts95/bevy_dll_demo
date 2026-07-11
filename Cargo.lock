@@ -1174,6 +1174,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "mod_car"
+version = "0.1.0"
+dependencies = [
+ "bevy_app",
+ "bevy_ecs",
+ "shared_api",
+]
+
+[[package]]
 name = "mod_game_loader"
 version = "0.1.0"
 dependencies = [

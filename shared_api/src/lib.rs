@@ -44,8 +44,24 @@ pub struct PlayerControl {
     pub jump_force: f32,
 }
 
+#[derive(Component, Deserialize, Serialize, Clone)]
+pub struct Collider {
+    pub half_extents: [f32; 2],
+}
+
+/// Marker for the root of a visual car hierarchy. This is used only by the
+/// car mod; physics uses the domain-neutral `Collider` component instead.
+#[derive(Component, Deserialize, Serialize, Clone)]
+pub struct CarBody {}
+
+#[derive(Component, Deserialize, Serialize, Clone)]
+pub struct CarWheel {
+    pub offset: [f32; 2],
+    pub spin_factor: f32,
+}
+
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
-pub enum GameLogicSet { Update }
+pub enum GameLogicSet { Update, PostUpdate }
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
 pub enum RenderSet { Clear, DrawOpaque, DrawUI }

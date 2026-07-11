@@ -1,5 +1,5 @@
 use bevy_app::App;
-use shared_api::{Transform, Visual, Spin};
+use shared_api::{CarBody, CarWheel, Collider, Transform, Visual, Spin};
 use ecs_prefab::{Library, PrefabRegistry};
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -48,7 +48,10 @@ pub unsafe extern "C" fn load_case(app_ptr: *mut std::ffi::c_void) -> i32 {
        .register::<Spin>()
        .register::<shared_api::Velocity>()
        .register::<shared_api::Gravity>()
-       .register::<shared_api::PlayerControl>();
+       .register::<shared_api::PlayerControl>()
+       .register::<Collider>()
+       .register::<CarBody>()
+       .register::<CarWheel>();
 
     let mut lib = Library::new();
 

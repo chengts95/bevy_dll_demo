@@ -1,6 +1,6 @@
 use bevy_app::{App, Update};
 use bevy_ecs::prelude::*;
-use shared_api::{GameLogicSet, Transform, Velocity, Gravity};
+use shared_api::{Collider, GameLogicSet, Transform, Velocity, Gravity};
 
 #[no_mangle]
 pub unsafe extern "C" fn setup_mod(app_ptr: *mut std::ffi::c_void) {
@@ -28,13 +28,14 @@ fn movement_system(mut query: Query<(&Velocity, &mut Transform)>) {
     }
 }
 
-fn ground_collision_system(mut query: Query<(&mut Transform, &mut Velocity)>) {
+fn ground_collision_system(mut query: Query<(&mut Transform, &mut Velocity, Option<&Collider>)>) {
     // Hardcoded ground line at Y = 550
     let ground_y = 550.0;
-    for (mut transform, mut vel) in query.iter_mut() {
-        let bottom_edge = transform.position[1] + transform.size[1] / 2.0;
+    for (mut transform, mut vel, collider) in query.iter_mut() {
+        let half_height = collider.map_or(transform.size[1] / 2.0, |collider| collider.half_extents[1]);
+        let bottom_edge = transform.position[1] + half_height;
         if bottom_edge > ground_y {
-            transform.position[1] = ground_y - transform.size[1] / 2.0;
+            transform.position[1] = ground_y - half_height;
             vel.vec[1] *= -0.4; // Bounce and dampen
             if vel.vec[1].abs() < 1.0 {
                 vel.vec[1] = 0.0;

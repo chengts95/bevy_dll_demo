@@ -35,6 +35,7 @@ pub unsafe extern "C" fn setup_mod(app_ptr: *mut std::ffi::c_void) {
         Update,
         (
             GameLogicSet::Update,
+            GameLogicSet::PostUpdate,
             RenderSet::Clear,
             RenderSet::DrawOpaque,
             RenderSet::DrawUI,
