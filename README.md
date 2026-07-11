@@ -28,9 +28,26 @@ This repository successfully achieves the following architectural milestones:
 
 ## Getting Started
 
-### 1. Build and Run (Development)
+### 1. Build and Play (TUI Launcher)
 
-To compile the entire workspace and launch the game locally in debug mode, simply run:
+The engine comes with a powerful, Paradox-style TUI Launcher that visualizes the modular architecture. 
+
+To launch it in your development environment, run:
+
+```bash
+cargo run -p launcher
+```
+
+**Interactive Demo:** 
+To truly see the power of the data-driven architecture, try navigating to the **Mods (F2)** tab in the Launcher. 
+* Uncheck `mod_physics` -> Click `Launch Game` (F5) -> *Notice that gravity completely disappears from the game.*
+* Uncheck `mod_player` -> Click `Launch Game` (F5) -> *Notice that the player character can no longer be controlled.*
+
+Because the engine relies purely on `playset.toml`, the Launcher acts as a Mod Manager that builds this playset. Disabling a mod simply prevents the host from injecting the DLL, turning off those features cleanly and instantly without modifying any source code.
+
+### 2. Manual Build and Run (Scripted)
+
+If you prefer to bypass the launcher, you can compile the entire workspace and launch the game locally via bash:
 
 ```bash
 ./build_and_run.sh
@@ -40,10 +57,9 @@ To compile the entire workspace and launch the game locally in debug mode, simpl
 
 This script will automatically:
 1. Compile the host and all mods.
-2. Read `playset.toml` and dynamically distribute the built `.so`/`.dll` files to their respective mod directories.
-3. Launch `game_runner`.
+2. Launch `game_runner`, reading from the static `playset.toml` in the root directory.
 
-### 2. Package for Distribution
+### 3. Package for Distribution
 
 When you are ready to ship your game to players, run the packaging script:
 
