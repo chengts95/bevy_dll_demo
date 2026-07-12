@@ -1,8 +1,6 @@
 use bevy_app::App;
-use bevy_ecs::prelude::Resource;
 use ecs_prefab::Library;
 use serde::Deserialize;
-use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use shared_api::AppModPrefabs;
@@ -25,8 +23,10 @@ struct ModManifest {
     prefabs_dir: PathBuf,
 }
 
-fn default_prefabs_dir() -> PathBuf { PathBuf::from("prefabs") }
-
+fn default_prefabs_dir() -> PathBuf {
+    PathBuf::from("prefabs")
+}
+#[allow(dead_code)]
 #[derive(Deserialize, Clone)]
 struct ModPlatform {
     linux: Option<ModDllPath>,
@@ -42,19 +42,32 @@ struct ModDllPath {
 fn main() {
     let mut app = App::new();
 
-    let playset_str = std::fs::read_to_string("playset.toml").expect("Failed to read playset.toml");
+    let playset_path = std::env::args_os()
+        .nth(1)
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from("playset.toml"));
+    let playset_str = std::fs::read_to_string(&playset_path)
+        .unwrap_or_else(|_| panic!("Failed to read {}", playset_path.display()));
     let playset: Playset = toml::from_str(&playset_str).expect("Failed to parse playset.toml");
+    let playset_dir = playset_path.parent().unwrap_or_else(|| Path::new("."));
 
     let mut mod_prefabs = Library::new();
     let mut loaded_libs = Vec::new();
 
     for playset_mod in playset.mods {
-        let manifest_str = std::fs::read_to_string(&playset_mod.descriptor).unwrap_or_else(|_| panic!("Failed to read {}", playset_mod.descriptor.display()));
-        let manifest: ModManifest = toml::from_str(&manifest_str).unwrap_or_else(|_| panic!("Failed to parse {}", playset_mod.descriptor.display()));
-        
+        let descriptor = if playset_mod.descriptor.is_absolute() {
+            playset_mod.descriptor
+        } else {
+            playset_dir.join(playset_mod.descriptor)
+        };
+        let manifest_str = std::fs::read_to_string(&descriptor)
+            .unwrap_or_else(|_| panic!("Failed to read {}", descriptor.display()));
+        let manifest: ModManifest = toml::from_str(&manifest_str)
+            .unwrap_or_else(|_| panic!("Failed to parse {}", descriptor.display()));
+
         println!("Game Runner: Loading Mod '{}'", manifest.name);
 
-        let mod_dir = playset_mod.descriptor.parent().unwrap_or_else(|| Path::new("."));
+        let mod_dir = descriptor.parent().unwrap_or_else(|| Path::new("."));
         let prefabs_dir = mod_dir.join(&manifest.prefabs_dir);
 
         // Load Global Prefabs from mod folder
@@ -73,21 +86,39 @@ fn main() {
         }
 
         // Load DLL
-        let target_dir = if cfg!(debug_assertions) { "debug" } else { "release" };
-        
-        #[cfg(target_os = "windows")]
-        let platform_cfg = manifest.platform.windows.as_ref().expect("Missing [platform.windows] in mod.toml");
-        #[cfg(target_os = "linux")]
-        let platform_cfg = manifest.platform.linux.as_ref().expect("Missing [platform.linux] in mod.toml");
+        let target_dir = if cfg!(debug_assertions) {
+            "debug"
+        } else {
+            "release"
+        };
 
-        let dll_name = if target_dir == "debug" { &platform_cfg.dll_path_debug } else { &platform_cfg.dll_path_release };
-        
+        #[cfg(target_os = "windows")]
+        let platform_cfg = manifest
+            .platform
+            .windows
+            .as_ref()
+            .expect("Missing [platform.windows] in mod.toml");
+        #[cfg(target_os = "linux")]
+        let platform_cfg = manifest
+            .platform
+            .linux
+            .as_ref()
+            .expect("Missing [platform.linux] in mod.toml");
+
+        let dll_name = if target_dir == "debug" {
+            &platform_cfg.dll_path_debug
+        } else {
+            &platform_cfg.dll_path_release
+        };
+
         // Correct distribution path: relative to the directory containing mod.toml
         let dll_path = mod_dir.join(dll_name);
 
         match unsafe { libloading::Library::new(&dll_path) } {
             Ok(lib) => {
-                if let Ok(setup) = unsafe { lib.get::<unsafe extern "C" fn(*mut std::ffi::c_void)>(b"setup_mod") } {
+                if let Ok(setup) =
+                    unsafe { lib.get::<unsafe extern "C" fn(*mut std::ffi::c_void)>(b"setup_mod") }
+                {
                     unsafe { setup(&mut app as *mut _ as *mut std::ffi::c_void) };
                 }
                 loaded_libs.push(lib);
@@ -101,7 +132,9 @@ fn main() {
 
     // Call load_case
     for lib in &loaded_libs {
-        if let Ok(load_case) = unsafe { lib.get::<unsafe extern "C" fn(*mut std::ffi::c_void) -> i32>(b"load_case") } {
+        if let Ok(load_case) =
+            unsafe { lib.get::<unsafe extern "C" fn(*mut std::ffi::c_void) -> i32>(b"load_case") }
+        {
             let code = unsafe { load_case(&mut app as *mut _ as *mut std::ffi::c_void) };
             if code != 0 {
                 eprintln!("Game Loader failed with code {}", code);

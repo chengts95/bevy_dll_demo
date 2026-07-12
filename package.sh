@@ -14,6 +14,7 @@ mkdir -p release_package/mods
 cp "$TARGET_DIR/game_runner" release_package/
 cp "$TARGET_DIR/launcher" release_package/
 cp game.json release_package/
+cp -R playsets release_package/
 
 cat << 'EOF' > release_package/launcher.toml
 runner_cmd = "./game_runner"
@@ -23,7 +24,9 @@ EOF
 echo 'name = "launcher"' > release_package/playset.toml
 echo '' >> release_package/playset.toml
 
-for desc in $(grep 'descriptor' playset.toml | sed -E 's/.*descriptor = "(.*)".*/\1/'); do
+DESCRIPTORS=$(grep -h 'descriptor' playset.toml playsets/*.toml | sed -E 's/.*descriptor = "(.*)".*/\1/' | sed 's#^\.\./##' | sort -u)
+
+for desc in $DESCRIPTORS; do
     # desc is e.g. "libs/mod_physics/mod.toml"
     CRATE_NAME=$(basename $(dirname "$desc"))
     
@@ -42,7 +45,10 @@ for desc in $(grep 'descriptor' playset.toml | sed -E 's/.*descriptor = "(.*)".*
     echo "  -> Packaging $CRATE_NAME..."
     cp "$SOURCE_DLL" "$DEPLOY_DIR/$DLL_TARGET"
 
-    # Register mod in release playset.toml
+done
+
+for desc in $(grep 'descriptor' playset.toml | sed -E 's/.*descriptor = "(.*)".*/\1/'); do
+    CRATE_NAME=$(basename $(dirname "$desc"))
     echo '[[mods]]' >> release_package/playset.toml
     echo "descriptor = \"mods/$CRATE_NAME/mod.toml\"" >> release_package/playset.toml
     echo '' >> release_package/playset.toml

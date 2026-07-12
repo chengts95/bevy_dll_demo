@@ -307,7 +307,7 @@ impl LauncherWindow {
         let playset_path = self.save_current_playset()?;
         
         let selected_save = self.selected_save_path();
-        launch_runner(
+        let pid = launch_runner(
             &self.root,
             &self.launcher_config.runner_cmd,
             &selected_save,
@@ -316,10 +316,12 @@ impl LauncherWindow {
         let enabled = self.enabled_mods();
         Ok(format!(
              "GAME LAUNCHED IN BACKGROUND\n\n\
+             Process ID\n  {}\n\n\
              Playset\n  {}\n\n\
              Save\n  {}\n\n\
              Enabled mod load list\n{}\n\n\
-             Check launcher_run.log for output.",
+             The final exit code or signal will be appended to launcher_run.log.",
+            pid,
             playset_path.display(),
             selected_save,
             format_mod_load_list(&enabled),

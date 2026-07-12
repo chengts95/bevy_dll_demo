@@ -10,6 +10,7 @@ This repository successfully achieves the following architectural milestones:
 - **Pure Data-Driven Assembly:** The engine knows absolutely nothing about the game it is running. The host application (`game_runner`) relies entirely on a `playset.toml` blueprint to discover, load, and distribute plugins dynamically at runtime.
 - **Prefab Hydration:** World states and entity templates are loaded dynamically from `game.json` using the custom `ecs_prefab` library. Game design is driven by JSON configuration rather than hardcoded Rust initialization.
 - **Standalone Release Packaging:** The architecture perfectly separates build artifacts from the source tree. A single packaging script can extract only the required executables, `.toml`/`.json` configs, and compiled `.so`/`.dll` libraries into a standalone, shippable folder.
+- **Swappable Rendering Backends:** Rendering is installed by a DLL mod, so a playset can select a different backend without changing the runner or game-logic mods. See [the Vello backend plan](CODEX_VELLO_BACKEND_PLAN.md).
 
 ## Architecture Structure
 
@@ -89,6 +90,30 @@ The rectangle is controlled without the car mod. The car uses the exact same
 controller contract; `mod_car` only adds car-specific wheel presentation.
 
 Because the engine relies purely on `playset.toml`, the Launcher acts as a Mod Manager that builds this playset. Disabling a mod simply prevents the host from injecting the DLL, turning off those features cleanly and instantly without modifying any source code.
+
+### Switch Rendering Backends
+
+The repository includes two renderer DLL mods:
+
+- `mod_canvas`: the original minifb + tiny-skia CPU renderer.
+- `mod_vello`: a winit + wgpu + Vello GPU renderer.
+
+Build once with `./build_and_run.sh`; the script distributes both renderer
+libraries. In the launcher, disable **Canvas Renderer**, enable **Vello GPU
+Renderer**, and run the same game again. Only one renderer may be enabled at a
+time because each renderer owns the window and installs the application runner.
+
+The example playsets can also be run directly:
+
+```bash
+cargo run -p game_runner -- playsets/canvas.toml
+cargo run -p game_runner -- playsets/vello.toml
+```
+
+Both commands use the same runner, game data, prefabs, physics, and player mods.
+Only the renderer DLL differs. After the initial build, the native
+`game_runner` executable can be invoked with either playset path without Cargo
+or recompilation.
 
 ### 2. Manual Build and Run (Scripted)
 

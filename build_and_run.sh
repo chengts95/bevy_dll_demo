@@ -18,7 +18,9 @@ TARGET_DIR="$CARGO_TARGET_DIR/$BUILD_MODE"
 
 echo "==> Distributing DLLs based on playset.toml and mod.toml ($BUILD_MODE)..."
 
-for desc in $(grep 'descriptor' playset.toml | sed -E 's/.*descriptor = "(.*)".*/\1/'); do
+DESCRIPTORS=$(grep -h 'descriptor' playset.toml playsets/*.toml | sed -E 's/.*descriptor = "(.*)".*/\1/' | sed 's#^\.\./##' | sort -u)
+
+for desc in $DESCRIPTORS; do
     MOD_DIR=$(dirname "$desc")
     CRATE_NAME=$(basename "$MOD_DIR")
     

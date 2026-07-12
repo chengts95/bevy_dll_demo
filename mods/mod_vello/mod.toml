@@ -1,0 +1,19 @@
+name = "Vello Renderer"
+title = "Vello GPU Renderer"
+version = "0.1.0"
+author = "Bevy DLL Demo"
+category = "Renderer"
+tags = ["renderer", "vello", "wgpu", "gpu"]
+description = "Alternative winit + wgpu + Vello rendering backend. Enable either this mod or Canvas Renderer, never both."
+
+[platform.linux]
+dll_path_debug = "libmod_vello.so"
+dll_path_release = "libmod_vello.so"
+
+[platform.windows]
+dll_path_debug = "mod_vello.dll"
+dll_path_release = "mod_vello.dll"
+
+[platform.macos]
+dll_path_debug = "libmod_vello.dylib"
+dll_path_release = "libmod_vello.dylib"

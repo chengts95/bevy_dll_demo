@@ -22,7 +22,7 @@ pub unsafe extern "C" fn setup_mod(app_ptr: *mut std::ffi::c_void) {
         600,
         minifb::WindowOptions::default(),
     ).unwrap();
-    window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
+    window.set_target_fps(60);
 
     app.insert_non_send(WindowResource { window });
     app.insert_non_send(CanvasResource {
