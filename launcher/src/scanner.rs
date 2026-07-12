@@ -436,23 +436,6 @@ fn descriptor_for_playset(descriptor: &Path, playset_path: &Path, root: &Path) -
     }
 }
 
-fn find_runner_exe(root: &Path) -> PathBuf {
-    let exe_name = if cfg!(target_os = "windows") {
-        "bevy_dll_runner.exe"
-    } else {
-        "bevy_dll_runner"
-    };
-    if let Ok(current) = std::env::current_exe() {
-        if let Some(dir) = current.parent() {
-            let sibling = dir.join(exe_name);
-            if sibling.exists() {
-                return sibling;
-            }
-        }
-    }
-    root.join("target").join("debug").join(exe_name)
-}
-
 fn app_root() -> PathBuf {
     if let Some(arg_root) = std::env::args().nth(1) {
         let path = PathBuf::from(arg_root);
@@ -462,4 +445,3 @@ fn app_root() -> PathBuf {
     }
     std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."))
 }
-

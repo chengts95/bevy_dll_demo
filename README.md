@@ -38,10 +38,55 @@ To launch it in your development environment, run:
 cargo run -p launcher
 ```
 
+The launcher reads the game command from `launcher.toml`. The checked-in
+development configuration intentionally uses Cargo:
+
+```toml
+runner_cmd = "cargo run -p game_runner"
+```
+
+This keeps one development command working on both Linux and Windows, where
+the native executable names and invocation syntax differ. Cargo is only a
+development-time runner here; it is not required by a packaged game.
+
+For a packaged build, `launcher.toml` must invoke the native executable instead:
+
+```toml
+# Linux package
+runner_cmd = "./game_runner"
+
+# Windows package
+runner_cmd = "game_runner.exe"
+```
+
+`package.sh` writes the Linux packaged command automatically. A Windows
+packaging process should write the `.exe` command shown above. The launcher
+parses `runner_cmd` as a program plus arguments and does not execute it through
+a shell, so shell operators such as `>`, `&&`, and `&` must not be used.
+
 **Interactive Demo:** 
 To truly see the power of the data-driven architecture, try navigating to the **Mods (F2)** tab in the Launcher. 
 * Uncheck `mod_physics` -> Click `Launch Game` (F5) -> *Notice that gravity completely disappears from the game.*
 * Uncheck `mod_player` -> Click `Launch Game` (F5) -> *Notice that the player character can no longer be controlled.*
+
+### Swap the Player Avatar
+
+`mod_player` is the standard controller and is independent of the player's
+appearance. The selected prefab only needs `PlayerControl` and `Velocity` to
+receive the same left/right/jump commands.
+
+In `game.json`, change the player instance between these two prefab names:
+
+```json
+{ "id": "player", "prefab": "player_rect" }
+```
+
+```json
+{ "id": "player", "prefab": "player_car" }
+```
+
+The rectangle is controlled without the car mod. The car uses the exact same
+controller contract; `mod_car` only adds car-specific wheel presentation.
 
 Because the engine relies purely on `playset.toml`, the Launcher acts as a Mod Manager that builds this playset. Disabling a mod simply prevents the host from injecting the DLL, turning off those features cleanly and instantly without modifying any source code.
 

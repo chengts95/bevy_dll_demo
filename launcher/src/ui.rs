@@ -294,47 +294,9 @@ fn format_save_details(root: &Path, save: &str) -> String {
     };
     
     format!(
-        "{}\n\n{}\n\nF5 runs the game with the selected save (if supported) and the enabled mod load order.",
+        "{}\n\n{}\n\nF5 runs the game with this save and the enabled mod load order.",
         save,
         meta
-    )
-}
-
-fn json_string_list(value: Option<&serde_json::Value>) -> Vec<String> {
-    value
-        .and_then(|value| value.as_array())
-        .map(|values| {
-            values
-                .iter()
-                .filter_map(|value| value.as_str().map(str::to_string))
-                .collect::<Vec<_>>()
-        })
-        .unwrap_or_default()
-}
-
-fn format_json_scalar(value: &serde_json::Value) -> String {
-    value
-        .as_str()
-        .map(str::to_string)
-        .unwrap_or_else(|| value.to_string())
-}
-
-fn indent_block(text: &str) -> String {
-    if text.trim().is_empty() {
-        "  <empty>".to_string()
-    } else {
-        text.lines()
-            .map(|line| format!("  {line}"))
-            .collect::<Vec<_>>()
-            .join("\n")
-    }
-}
-
-fn format_run_overrides(dt: &Option<String>, duration: &Option<String>) -> String {
-    format!(
-        "  dt: {}\n  duration: {}",
-        dt.as_deref().unwrap_or("save default"),
-        duration.as_deref().unwrap_or("save default")
     )
 }
 
@@ -362,4 +324,3 @@ fn turbo_theme() -> Theme {
     theme.searchbar.focused = CharAttribute::new(Color::White, Color::Black, CharFlags::None);
     theme
 }
-

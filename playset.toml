@@ -10,10 +10,10 @@ descriptor = "mods/mod_block/mod.toml"
 descriptor = "mods/mod_physics/mod.toml"
 
 [[mods]]
+descriptor = "mods/mod_game_loader/mod.toml"
+
+[[mods]]
 descriptor = "mods/mod_player/mod.toml"
 
 [[mods]]
 descriptor = "mods/mod_car/mod.toml"
-
-[[mods]]
-descriptor = "mods/mod_game_loader/mod.toml"

@@ -13,7 +13,23 @@
         }
       ]
     },
-    "car": {
+    "player_rect": {
+      "params": { "x": 180.0, "y": 450.0, "color": [0.95, 0.35, 0.2, 1.0] },
+      "body": [
+        {
+          "id": 0,
+          "components": {
+            "Transform": { "position": ["$x", "$y", 0.0], "size": [60.0, 60.0, 0.0], "rotation": 0.0 },
+            "Visual": { "color": "$color" },
+            "Velocity": { "vec": [0.0, 0.0] },
+            "Gravity": { "force": 0.3 },
+            "PlayerControl": { "speed": 4.0, "jump_force": 12.0 },
+            "Collider": { "half_extents": [30.0, 30.0] }
+          }
+        }
+      ]
+    },
+    "player_car": {
       "params": { "x": 180.0, "y": 450.0, "color": [0.1, 0.5, 0.9, 1.0] },
       "body": [
         {
@@ -61,7 +77,7 @@
     }
   },
   "instances": [
-    { "id": "player_car", "prefab": "car" },
+    { "id": "player", "prefab": "player_car" },
     { "id": "box1", "prefab": "bouncy_box" },
     { "id": "ground", "prefab": "ground" }
   ]

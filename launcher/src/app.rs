@@ -13,8 +13,6 @@ struct LauncherWindow {
     save_details: Handle<TextArea>,
     details: Handle<TextArea>,
     run_log: Handle<TextArea>,
-    dt_override: Handle<TextField>,
-    duration_override: Handle<TextField>,
     status: Handle<Label>,
     mods_data: Vec<ModEntry>,
     library_entries: Vec<LibraryEntry>,
@@ -57,8 +55,6 @@ impl LauncherWindow {
             save_details: Handle::None,
             details: Handle::None,
             run_log: Handle::None,
-            dt_override: Handle::None,
-            duration_override: Handle::None,
             status: Handle::None,
             mods_data,
             library_entries: Vec::new(),
@@ -287,7 +283,7 @@ impl LauncherWindow {
     fn validate_mods(&mut self) {
         let enabled = self.enabled_mods();
         self.refresh_run_log(&format!(
-            "MOD LIST\n\nEnabled load order:\n{}\n\nTUI metadata stays here. Runner input is only the ordered enabled mod list plus the save path.",
+            "MOD LIST\n\nEnabled load order:\n{}\n\nThe runner receives this ordered mod list and the save selected on the Saves tab.",
             format_mod_load_list(&enabled)
         ));
     }
@@ -311,57 +307,24 @@ impl LauncherWindow {
     fn save_playset_and_run(&self) -> Result<String, Box<dyn std::error::Error>> {
         let playset_path = self.save_current_playset()?;
         
-        let runner_cmd = &self.launcher_config.runner_cmd;
-        
-        // Use bash to run in the background so the launcher doesn't block!
-        Command::new("bash")
-            .arg("-c")
-            .arg(format!("{} > launcher_run.log 2>&1 &", runner_cmd))
-            .current_dir(&self.root)
-            .spawn()
-            .map_err(|err| format!("failed to start game: {err}"))?;
+        let selected_save = self.selected_save_path();
+        launch_runner(
+            &self.root,
+            &self.launcher_config.runner_cmd,
+            &selected_save,
+        )?;
 
         let enabled = self.enabled_mods();
         Ok(format!(
              "GAME LAUNCHED IN BACKGROUND\n\n\
              Playset\n  {}\n\n\
+             Save\n  {}\n\n\
              Enabled mod load list\n{}\n\n\
              Check launcher_run.log for output.",
             playset_path.display(),
+            selected_save,
             format_mod_load_list(&enabled),
         ))
-    }
-
-    fn read_run_override(
-        &self,
-        handle: Handle<TextField>,
-        name: &str,
-        allow_zero: bool,
-    ) -> Result<Option<String>, Box<dyn std::error::Error>> {
-        let Some(raw) = self
-            .control(handle)
-            .map(|field| field.text().trim().to_string())
-        else {
-            return Ok(None);
-        };
-        if raw.is_empty() {
-            return Ok(None);
-        }
-
-        let value = raw
-            .parse::<f64>()
-            .map_err(|err| format!("{name} override must be a number: {err}"))?;
-        if !value.is_finite() {
-            return Err(format!("{name} override must be finite").into());
-        }
-        if allow_zero {
-            if value < 0.0 {
-                return Err(format!("{name} override must be zero or greater").into());
-            }
-        } else if value <= 0.0 {
-            return Err(format!("{name} override must be greater than zero").into());
-        }
-        Ok(Some(raw))
     }
 
     fn save_current_playset(&self) -> Result<PathBuf, Box<dyn std::error::Error>> {
@@ -500,4 +463,3 @@ enum MoveDirection {
     Up,
     Down,
 }
-

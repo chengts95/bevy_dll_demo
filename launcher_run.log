@@ -25,14 +25,16 @@ warning: field `windows` is never read
    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
 
 warning: `game_runner` (bin "game_runner") generated 3 warnings (run `cargo fix --bin "game_runner" -p game_runner` to apply 2 suggestions)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.07s
-     Running `/tmp/bevy_macroquad_target/debug/game_runner`
+    Finished `release` profile [optimized] target(s) in 0.06s
+     Running `/tmp/bevy_macroquad_target/release/game_runner`
 Game Runner: Loading Mod 'Canvas Renderer'
 Game Runner: Loading Mod 'Block Logic'
-Game Runner: Loading Mod 'Player Controller'
+Game Runner: Loading Mod 'Physics Engine'
 Game Runner: Loading Mod 'Game Loader'
+Game Runner: Loading Mod 'Player Controller'
+Game Runner: Loading Mod 'Car Visuals'
 Game Loader: Successfully spawned 3 instances via ecs_prefab!
-warning: queue 0x55637587f200 destroyed while proxies still attached:
+warning: queue 0x5600972ce570 destroyed while proxies still attached:
   wl_buffer#21 still attached
   wl_buffer#20 still attached
   wl_shm_pool#19 still attached

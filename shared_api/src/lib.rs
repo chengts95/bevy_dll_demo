@@ -28,6 +28,17 @@ pub struct InputState {
     pub space_pressed: bool,
 }
 
+impl InputState {
+    /// Horizontal player intent shared by every controllable avatar.
+    pub fn move_axis(&self) -> f32 {
+        match (self.left_down, self.right_down) {
+            (true, false) => -1.0,
+            (false, true) => 1.0,
+            _ => 0.0,
+        }
+    }
+}
+
 #[derive(Component, Deserialize, Serialize, Clone)]
 pub struct Velocity {
     pub vec: [f32; 2],
@@ -40,7 +51,9 @@ pub struct Gravity {
 
 #[derive(Component, Deserialize, Serialize, Clone)]
 pub struct PlayerControl {
+    /// Maximum horizontal speed for whichever avatar owns this component.
     pub speed: f32,
+    /// Vertical impulse requested by the standard action button.
     pub jump_force: f32,
 }
 
@@ -61,9 +74,36 @@ pub struct CarWheel {
 }
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
-pub enum GameLogicSet { Update, PostUpdate }
+pub enum GameLogicSet {
+    Update,
+    PostUpdate,
+}
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
-pub enum RenderSet { Clear, DrawOpaque, DrawUI }
+pub enum RenderSet {
+    Clear,
+    DrawOpaque,
+    DrawUI,
+}
 
 pub struct MainThreadMarker;
+
+#[cfg(test)]
+mod tests {
+    use super::InputState;
+
+    #[test]
+    fn horizontal_input_is_normalized_for_all_avatars() {
+        let mut input = InputState::default();
+        assert_eq!(input.move_axis(), 0.0);
+
+        input.left_down = true;
+        assert_eq!(input.move_axis(), -1.0);
+
+        input.right_down = true;
+        assert_eq!(input.move_axis(), 0.0);
+
+        input.left_down = false;
+        assert_eq!(input.move_axis(), 1.0);
+    }
+}

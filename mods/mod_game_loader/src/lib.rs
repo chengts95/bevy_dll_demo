@@ -26,10 +26,13 @@ pub unsafe extern "C" fn setup_mod(_app_ptr: *mut std::ffi::c_void) {}
 pub unsafe extern "C" fn load_case(app_ptr: *mut std::ffi::c_void) -> i32 {
     let app = unsafe { &mut *(app_ptr as *mut App) };
     
-    let data = match std::fs::read_to_string("game.json") {
+    let game_path = std::env::var_os("BEVY_GAME_FILE")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|| std::path::PathBuf::from("game.json"));
+    let data = match std::fs::read_to_string(&game_path) {
         Ok(d) => d,
         Err(e) => {
-            eprintln!("Game Loader: Failed to read game.json: {}", e);
+            eprintln!("Game Loader: Failed to read {}: {}", game_path.display(), e);
             return 1;
         }
     };
@@ -37,7 +40,7 @@ pub unsafe extern "C" fn load_case(app_ptr: *mut std::ffi::c_void) -> i32 {
     let manifest: GameManifest = match serde_json::from_str(&data) {
         Ok(m) => m,
         Err(e) => {
-            eprintln!("Game Loader: Failed to parse game.json: {}", e);
+            eprintln!("Game Loader: Failed to parse {}: {}", game_path.display(), e);
             return 2;
         }
     };

@@ -1,14 +1,13 @@
+use appcui::prelude::*;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::Command;
-
-use appcui::prelude::*;
 
 
 include!("types.rs");
 include!("app.rs");
 include!("ui.rs");
 include!("scanner.rs");
+include!("runner.rs");
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new()
