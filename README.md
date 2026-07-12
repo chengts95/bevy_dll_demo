@@ -10,7 +10,7 @@ This repository successfully achieves the following architectural milestones:
 - **Pure Data-Driven Assembly:** The engine knows absolutely nothing about the game it is running. The host application (`game_runner`) relies entirely on a `playset.toml` blueprint to discover, load, and distribute plugins dynamically at runtime.
 - **Prefab Hydration:** World states and entity templates are loaded dynamically from `game.json` using the custom `ecs_prefab` library. Game design is driven by JSON configuration rather than hardcoded Rust initialization.
 - **Standalone Release Packaging:** The architecture perfectly separates build artifacts from the source tree. A single packaging script can extract only the required executables, `.toml`/`.json` configs, and compiled `.so`/`.dll` libraries into a standalone, shippable folder.
-- **Swappable Rendering Backends:** Rendering is installed by a DLL mod, so a playset can select a different backend without changing the runner or game-logic mods. See [the Vello backend plan](CODEX_VELLO_BACKEND_PLAN.md).
+- **Swappable Rendering Backends:** Rendering is installed by a DLL mod, so a playset can select a different backend without changing the runner or game-logic mods. 
 
 ## Architecture Structure
 
