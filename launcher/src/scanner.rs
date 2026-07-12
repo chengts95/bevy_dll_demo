@@ -389,36 +389,73 @@ fn resolve_path(base: &Path, path: &Path) -> PathBuf {
     }
 }
 
-fn scan_saves(root: &Path) -> Vec<String> {
-    let mut saves = Vec::new();
+fn scan_game_files(root: &Path) -> Vec<String> {
+    let mut files = Vec::new();
+    collect_game_files(root, root, &mut files);
     for dir_name in ["Saves", "saves"] {
-        let save_dir = root.join(dir_name);
-        if let Ok(entries) = fs::read_dir(&save_dir) {
-            for entry in entries.flatten() {
-                let path = entry.path();
-                if path.extension().and_then(|value| value.to_str()) == Some("json")
-                    && path
-                        .file_name()
-                        .and_then(|value| value.to_str())
-                        .map(|name| name.ends_with(".save.json"))
-                        .unwrap_or(false)
-                {
-                    let display = path
-                        .strip_prefix(root)
-                        .unwrap_or(&path)
-                        .display()
-                        .to_string();
-                    saves.push(display);
-                }
-            }
+        collect_game_files(root, &root.join(dir_name), &mut files);
+    }
+
+    files.sort();
+    files.dedup();
+    if files.is_empty() {
+        files.push("game.json".to_string());
+    }
+    files
+}
+
+fn collect_game_files(root: &Path, directory: &Path, files: &mut Vec<String>) {
+    let Ok(entries) = fs::read_dir(directory) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if !path.is_file()
+            || path.extension().and_then(|value| value.to_str()) != Some("json")
+            || !is_game_manifest(&path)
+        {
+            continue;
         }
+        files.push(
+            path.strip_prefix(root)
+                .unwrap_or(&path)
+                .display()
+                .to_string(),
+        );
     }
-    saves.sort();
-    saves.dedup();
-    if saves.is_empty() {
-        saves.push("game.json".to_string());
+}
+
+fn is_game_manifest(path: &Path) -> bool {
+    fs::read_to_string(path)
+        .ok()
+        .map(|data| has_game_manifest_shape(&data))
+        .unwrap_or(false)
+}
+
+fn has_game_manifest_shape(data: &str) -> bool {
+    serde_json::from_str::<serde_json::Value>(data)
+        .ok()
+        .and_then(|value| value.get("instances").cloned())
+        .is_some_and(|instances| instances.is_array())
+}
+
+#[cfg(test)]
+mod scanner_tests {
+    use super::has_game_manifest_shape;
+
+    #[test]
+    fn recognizes_game_manifests_by_structure() {
+        assert!(has_game_manifest_shape(r#"{"instances": []}"#));
+        assert!(has_game_manifest_shape(
+            r#"{"prefabs": {}, "instances": [{"id":"x"}]}"#
+        ));
     }
-    saves
+
+    #[test]
+    fn ignores_other_or_invalid_json_files() {
+        assert!(!has_game_manifest_shape(r#"{"entries": []}"#));
+        assert!(!has_game_manifest_shape("not json"));
+    }
 }
 
 fn descriptor_for_playset(descriptor: &Path, playset_path: &Path, root: &Path) -> String {

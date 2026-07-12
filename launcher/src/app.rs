@@ -44,7 +44,7 @@ impl LauncherWindow {
         };
 
         let mut win = Self {
-            base: window!("' Bevy Engine Launcher ',a:c,w:124,h:39"),
+            base: window!("' Bevy Engine Launcher ',l:0,t:0,r:0,b:0"),
             root,
             launcher_config,
             tabs: Handle::None,
@@ -61,11 +61,11 @@ impl LauncherWindow {
         };
 
         win.add(label!(
-            "'BEVY DLL ENGINE  |  paradox-style mod launcher',x:2,y:1,w:72,h:1"
+            "'BEVY DLL ENGINE  |  mod launcher',l:2,t:1,r:28,h:1"
         ));
-        let status = win.add(label!("'',x:82,y:1,w:39,h:1"));
+        let status = win.add(label!("'',r:2,t:1,w:25,h:1"));
 
-        let mut tabs = Tab::new(layout!("x:1,y:3,w:122,h:32"), tab::Flags::TabsBar);
+        let mut tabs = Tab::new(layout!("l:1,t:3,r:1,b:3"), tab::Flags::TabsBar);
         let home_tab = tabs.add_tab("Home");
         let mods_tab = tabs.add_tab("Mods");
         let library_tab = tabs.add_tab("Library");
@@ -79,11 +79,10 @@ impl LauncherWindow {
         let run_log = build_run_page(&mut tabs, run_tab);
 
         // Map desktop navigation buttons
-        win.add(button!("'F2 Mods',x:2,y:36,w:15"));
-        win.add(button!("'F3 Library',x:19,y:36,w:15"));
-        win.add(button!("'F4 Saves',x:36,y:36,w:15"));
-        win.add(button!("'F5 Run',x:53,y:36,w:15"));
-        win.add(button!("'Esc Home',x:103,y:36,w:15"));
+        win.add(button!("'F2 Mods',l:1,b:0,w:11"));
+        win.add(button!("'F3 Library',l:13,b:0,w:13"));
+        win.add(button!("'F4 Saves',l:27,b:0,w:12"));
+        win.add(button!("'F5 Run',l:40,b:0,w:10"));
 
         win.tabs = win.add(tabs);
         win.mods = mods;
@@ -190,7 +189,7 @@ impl LauncherWindow {
     }
 
     fn refresh_save_selection(&mut self) {
-        let save_files = scan_saves(&self.root);
+        let save_files = scan_game_files(&self.root);
         let saves_handle = self.saves;
         if let Some(saves) = self.control_mut(saves_handle) {
             saves.clear();
@@ -381,9 +380,9 @@ impl ButtonEvents for LauncherWindow {
             "F5 Run" | "Run" | "Launch Game" => self.run_selected_save(),
             "Esc Home" | "Back Home" => self.set_tab(0),
             "Toggle" => self.toggle_selected_mod(),
-            "Move Up" => self.move_selected_mod(MoveDirection::Up),
-            "Move Down" => self.move_selected_mod(MoveDirection::Down),
-            "Validate" => self.validate_mods(),
+            "Move Up" | "Up" => self.move_selected_mod(MoveDirection::Up),
+            "Move Down" | "Down" => self.move_selected_mod(MoveDirection::Down),
+            "Validate" | "Check" => self.validate_mods(),
             "Quit" => self.close(),
             _ => return EventProcessStatus::Ignored,
         }

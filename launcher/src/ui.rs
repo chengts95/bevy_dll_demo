@@ -1,6 +1,6 @@
 fn build_home_page(tabs: &mut Tab, tab: u32) {
     let mut welcome =
-        Panel::with_type("Welcome", layout!("x:2,y:1,w:77,h:28"), panel::Type::Window);
+        Panel::with_type("Welcome", layout!("l:1,t:1,w:65%,b:1"), panel::Type::Window);
     welcome.add(label!("'Bevy Engine',x:2,y:2,w:32,h:1"));
     welcome.add(label!(
         "'Dynamic mod launcher for runner and saves.',x:2,y:4,w:68,h:1"
@@ -17,14 +17,14 @@ fn build_home_page(tabs: &mut Tab, tab: u32) {
          3. Enable mods and arrange load order\n\
          4. Select a save and build the dynamic runner command\n\
          5. Start bevy_dll_runner with the selected mod list",
-        layout!("x:2,y:7,w:70,h:16"),
+        layout!("l:2,t:7,r:2,b:2"),
         textarea::Flags::ReadOnly,
     ));
     tabs.add(tab, welcome);
 
     let mut menu = Panel::with_type(
         "Main Menu",
-        layout!("x:82,y:1,w:37,h:28"),
+        layout!("r:1,t:1,w:33%,b:1"),
         panel::Type::Raised,
     );
     menu.add(button!("'F2 Mods',x:3,y:3,w:28"));
@@ -41,29 +41,29 @@ fn build_home_page(tabs: &mut Tab, tab: u32) {
 fn build_library_page(tabs: &mut Tab, tab: u32) -> (Handle<ListBox>, Handle<TextArea>) {
     let mut browser = Panel::with_type(
         "Asset Library",
-        layout!("x:1,y:1,w:66,h:27"),
+        layout!("l:1,t:1,w:55%,b:1"),
         panel::Type::Sunken,
     );
     browser.add(label!(
         "'Kind        Name                         Mod                  Category',x:1,y:1,w:62,h:1"
     ));
     let library = browser.add(ListBox::new(
-        layout!("x:1,y:3,w:62,h:19"),
+        layout!("l:1,t:3,r:1,b:4"),
         listbox::Flags::ScrollBars
             | listbox::Flags::SearchBar
             | listbox::Flags::HighlightSelectedItemWhenInactive,
     ));
-    browser.add(button!("'Back Home',x:1,y:23,w:14"));
+    browser.add(button!("'Back Home',l:1,b:1,w:14"));
     tabs.add(tab, browser);
 
     let mut info = Panel::with_type(
         "Entry Info",
-        layout!("x:70,y:1,w:49,h:27"),
+        layout!("r:1,t:1,w:43%,b:1"),
         panel::Type::Sunken,
     );
     let details = info.add(TextArea::new(
         "",
-        layout!("x:1,y:1,w:45,h:23"),
+        layout!("l:1,t:1,r:1,b:1"),
         textarea::Flags::ReadOnly,
     ));
     tabs.add(tab, info);
@@ -73,59 +73,60 @@ fn build_library_page(tabs: &mut Tab, tab: u32) -> (Handle<ListBox>, Handle<Text
 fn build_mods_page(tabs: &mut Tab, tab: u32) -> (Handle<ListBox>, Handle<TextArea>) {
     let mut load_order = Panel::with_type(
         "Mod Load Order",
-        layout!("x:1,y:1,w:78,h:27"),
+        layout!("l:1,t:1,w:62%,b:1"),
         panel::Type::Sunken,
     );
     load_order.add(label!(
         "'Slot        Mod                            Version   Origin   State',x:1,y:1,w:72,h:1"
     ));
     let mods = load_order.add(ListBox::new(
-        layout!("x:1,y:3,w:74,h:19"),
+        layout!("l:1,t:3,r:1,b:4"),
         listbox::Flags::ScrollBars
             | listbox::Flags::SearchBar
             | listbox::Flags::CheckBoxes
             | listbox::Flags::HighlightSelectedItemWhenInactive,
     ));
-    load_order.add(button!("'Toggle',x:1,y:23,w:12"));
-    load_order.add(button!("'Move Up',x:15,y:23,w:12"));
-    load_order.add(button!("'Move Down',x:29,y:23,w:12"));
-    load_order.add(button!("'Validate',x:43,y:23,w:12"));
+    load_order.add(button!("'Toggle',l:1,b:1,w:8"));
+    load_order.add(button!("'Up',l:10,b:1,w:7"));
+    load_order.add(button!("'Down',l:18,b:1,w:7"));
+    load_order.add(button!("'Check',l:26,b:1,w:8"));
+    load_order.add(button!("'Run',l:35,b:1,w:7"));
     tabs.add(tab, load_order);
 
     let mut meta = Panel::with_type(
         "Mod Metadata",
-        layout!("x:81,y:1,w:39,h:27"),
+        layout!("r:1,t:1,w:36%,b:1"),
         panel::Type::Sunken,
     );
     let details = meta.add(TextArea::new(
         "",
-        layout!("x:1,y:1,w:35,h:23"),
+        layout!("l:1,t:1,r:1,b:4"),
         textarea::Flags::ReadOnly,
     ));
-    meta.add(button!("'Back Home',x:1,y:24,w:14"));
+    meta.add(button!("'Back Home',l:1,b:1,w:14"));
     tabs.add(tab, meta);
     (mods, details)
 }
 
 fn build_saves_page(tabs: &mut Tab, tab: u32) -> (Handle<ListBox>, Handle<TextArea>) {
     let mut save_panel =
-        Panel::with_type("Saves", layout!("x:1,y:1,w:66,h:27"), panel::Type::Sunken);
+        Panel::with_type("Game Files", layout!("l:1,t:1,w:55%,b:1"), panel::Type::Sunken);
     let saves = save_panel.add(ListBox::new(
-        layout!("x:1,y:1,w:62,h:21"),
+        layout!("l:1,t:1,r:1,b:4"),
         listbox::Flags::ScrollBars | listbox::Flags::HighlightSelectedItemWhenInactive,
     ));
-    save_panel.add(button!("'Launch Game',x:1,y:23,w:14"));
-    save_panel.add(button!("'Back Home',x:17,y:23,w:14"));
+    save_panel.add(button!("'Launch Game',l:1,b:1,w:14"));
+    save_panel.add(button!("'Back Home',l:16,b:1,w:14"));
     tabs.add(tab, save_panel);
 
     let mut info = Panel::with_type(
-        "Save Metadata",
-        layout!("x:70,y:1,w:49,h:27"),
+        "Game Manifest",
+        layout!("r:1,t:1,w:43%,b:1"),
         panel::Type::Sunken,
     );
     let details = info.add(TextArea::new(
         "",
-        layout!("x:1,y:1,w:45,h:23"),
+        layout!("l:1,t:1,r:1,b:1"),
         textarea::Flags::ReadOnly,
     ));
     tabs.add(tab, info);
@@ -135,17 +136,17 @@ fn build_saves_page(tabs: &mut Tab, tab: u32) -> (Handle<ListBox>, Handle<TextAr
 fn build_run_page(tabs: &mut Tab, tab: u32) -> Handle<TextArea> {
     let mut console = Panel::with_type(
         "Run Console",
-        layout!("x:1,y:1,w:118,h:27"),
+        layout!("l:1,t:1,r:1,b:1"),
         panel::Type::Sunken,
     );
     let log = console.add(TextArea::new(
         "",
-        layout!("x:1,y:1,w:114,h:21"),
+        layout!("l:1,t:1,r:1,b:4"),
         textarea::Flags::ReadOnly,
     ));
-    console.add(button!("'Validate',x:1,y:23,w:12"));
-    console.add(button!("'Launch Game',x:15,y:23,w:12"));
-    console.add(button!("'Back Home',x:29,y:23,w:12"));
+    console.add(button!("'Validate',l:1,b:1,w:12"));
+    console.add(button!("'Launch Game',l:14,b:1,w:14"));
+    console.add(button!("'Back Home',l:29,b:1,w:14"));
     tabs.add(tab, console);
     log
 }
@@ -288,9 +289,9 @@ fn display_or_none(value: &str) -> &str {
 fn format_save_details(root: &Path, save: &str) -> String {
     let path = root.join(save);
     let meta = if path.exists() {
-        "Save file verified and ready to load."
+        "Game manifest verified and ready to load."
     } else {
-        "Save file could not be found."
+        "Game manifest could not be found."
     };
     
     format!(
