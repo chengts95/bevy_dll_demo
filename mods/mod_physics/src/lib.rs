@@ -1,17 +1,17 @@
 use bevy_app::{App, Update};
 use bevy_ecs::prelude::*;
-use shared_api::{Collider, GameLogicSet, Transform, Velocity, Gravity};
+use shared_api::{Collider, GameLogicSet, Gravity, Transform, Velocity};
+
+bevy_dll_mod_api::export_type_id_probes!();
 
 #[no_mangle]
 pub unsafe extern "C" fn setup_mod(app_ptr: *mut std::ffi::c_void) {
     let app = &mut *(app_ptr as *mut App);
     app.add_systems(
         Update,
-        (
-            gravity_system,
-            movement_system,
-            ground_collision_system
-        ).chain().in_set(GameLogicSet::Update)
+        (gravity_system, movement_system, ground_collision_system)
+            .chain()
+            .in_set(GameLogicSet::Update),
     );
 }
 
@@ -32,7 +32,8 @@ fn ground_collision_system(mut query: Query<(&mut Transform, &mut Velocity, Opti
     // Hardcoded ground line at Y = 550
     let ground_y = 550.0;
     for (mut transform, mut vel, collider) in query.iter_mut() {
-        let half_height = collider.map_or(transform.size[1] / 2.0, |collider| collider.half_extents[1]);
+        let half_height =
+            collider.map_or(transform.size[1] / 2.0, |collider| collider.half_extents[1]);
         let bottom_edge = transform.position[1] + half_height;
         if bottom_edge > ground_y {
             transform.position[1] = ground_y - half_height;
@@ -41,11 +42,11 @@ fn ground_collision_system(mut query: Query<(&mut Transform, &mut Velocity, Opti
                 vel.vec[1] = 0.0;
             }
         }
-        
+
         // Wall collision (hardcoded screen bounds 0 ~ 800)
         let left_edge = transform.position[0] - transform.size[0] / 2.0;
         let right_edge = transform.position[0] + transform.size[0] / 2.0;
-        
+
         if left_edge < 0.0 {
             transform.position[0] = transform.size[0] / 2.0;
             vel.vec[0] *= -0.5;

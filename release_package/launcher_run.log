@@ -1,13 +1,13 @@
-LAUNCHER: starting `./release_package/game_runner`
+LAUNCHER: starting `./game_runner`
+LAUNCHER: start in `/home/cts/workspace/bevy_dll_demo/./release_package`
 LAUNCHER: game file `game.json`
 Game Runner: Loading Mod 'Block Logic'
 Game Runner: Loading Mod 'Physics Engine'
 Game Runner: Loading Mod 'Game Loader'
 Game Runner: Loading Mod 'Player Controller'
-Game Runner: Loading Mod 'Car Visuals'
 Game Runner: Loading Mod 'Canvas Renderer'
 Game Loader: Successfully spawned 3 instances via ecs_prefab!
-warning: queue 0x562936fd0ec0 destroyed while proxies still attached:
+warning: queue 0x55a74b582f50 destroyed while proxies still attached:
   wl_buffer#21 still attached
   wl_buffer#20 still attached
   wl_shm_pool#19 still attached

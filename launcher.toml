@@ -1,3 +1,4 @@
 # Launcher Configuration
 # This file tells the launcher how to execute the game.
-runner_cmd = "cargo run --release --bin game_runner"
+start_in = "./release_package"
+runner_cmd = "./game_runner"

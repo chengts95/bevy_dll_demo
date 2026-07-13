@@ -1,9 +1,6 @@
 name = "launcher"
 
 [[mods]]
-descriptor = "mods/mod_vello/mod.toml"
-
-[[mods]]
 descriptor = "mods/mod_block/mod.toml"
 
 [[mods]]
@@ -16,5 +13,4 @@ descriptor = "mods/mod_game_loader/mod.toml"
 descriptor = "mods/mod_player/mod.toml"
 
 [[mods]]
-descriptor = "mods/mod_car/mod.toml"
-
+descriptor = "mods/mod_canvas/mod.toml"

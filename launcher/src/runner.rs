@@ -6,11 +6,13 @@ fn launch_runner(
     save_path: &str,
 ) -> Result<u32, Box<dyn std::error::Error>> {
     let (program, program_args) = parse_runner_command(command_line)?;
+    let program = resolve_program(root, &program);
 
     let log_path = root.join("launcher_run.log");
     let mut stdout = fs::File::create(&log_path)
         .map_err(|err| format!("failed to create {}: {err}", log_path.display()))?;
     writeln!(stdout, "LAUNCHER: starting `{command_line}`")?;
+    writeln!(stdout, "LAUNCHER: start in `{}`", root.display())?;
     writeln!(stdout, "LAUNCHER: game file `{save_path}`")?;
     let stderr = stdout
         .try_clone()
@@ -24,7 +26,7 @@ fn launch_runner(
         .stdout(stdout)
         .stderr(stderr)
         .spawn()
-        .map_err(|err| format!("failed to start {program}: {err}"))?;
+        .map_err(|err| format!("failed to start {}: {err}", program.display()))?;
     let pid = child.id();
 
     std::thread::spawn(move || {
@@ -66,9 +68,24 @@ fn parse_runner_command(
     Ok((program, args.collect()))
 }
 
+fn resolve_program(root: &Path, program: &str) -> PathBuf {
+    let path = Path::new(program);
+    if path.is_absolute() {
+        return path.to_path_buf();
+    }
+
+    if program.contains(std::path::MAIN_SEPARATOR) || program.contains('/') || program.contains('\\')
+    {
+        return root.join(path);
+    }
+
+    path.to_path_buf()
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{format_exit_status, parse_runner_command};
+    use super::{format_exit_status, parse_runner_command, resolve_program};
+    use std::path::Path;
 
     #[test]
     fn parses_program_arguments_and_quotes() {
@@ -80,6 +97,19 @@ mod tests {
     #[test]
     fn rejects_an_empty_command() {
         assert!(parse_runner_command("  ").is_err());
+    }
+
+    #[test]
+    fn resolves_relative_programs_against_start_dir() {
+        assert_eq!(
+            resolve_program(Path::new("/game"), "./game_runner"),
+            Path::new("/game").join("./game_runner")
+        );
+    }
+
+    #[test]
+    fn leaves_path_lookup_commands_unqualified() {
+        assert_eq!(resolve_program(Path::new("/game"), "cargo"), Path::new("cargo"));
     }
 
     #[cfg(unix)]

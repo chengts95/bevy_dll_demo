@@ -15,6 +15,7 @@ bevy_app = { path = "libs/bevy_base/bevy_app" }
 bevy_ecs = { path = "libs/bevy_base/bevy_ecs" }
 shared_api = { path = "shared_api" }
 ecs_prefab = { path = "libs/ecs_prefab" }
+bevy_dll_mod_api = { path = "../bevy_dll_mod/bevy_dll_mod_api" }
 
 [patch.crates-io]
 bevy_ecs = { path = "libs/bevy_base/bevy_ecs" }

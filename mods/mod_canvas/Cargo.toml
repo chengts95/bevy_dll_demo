@@ -10,5 +10,6 @@ crate-type = ["cdylib", "rlib"]
 bevy_app.workspace = true
 bevy_ecs.workspace = true
 shared_api.workspace = true
+bevy_dll_mod_api.workspace = true
 minifb = "0.27"
 tiny-skia = "0.11"

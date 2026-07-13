@@ -3,6 +3,8 @@ use bevy_ecs::hierarchy::ChildOf;
 use bevy_ecs::prelude::*;
 use shared_api::{CarBody, CarWheel, GameLogicSet, Transform, Velocity};
 
+bevy_dll_mod_api::export_type_id_probes!();
+
 #[no_mangle]
 pub unsafe extern "C" fn setup_mod(app_ptr: *mut std::ffi::c_void) {
     let app = &mut *(app_ptr as *mut App);
@@ -11,10 +13,7 @@ pub unsafe extern "C" fn setup_mod(app_ptr: *mut std::ffi::c_void) {
 
 fn sync_wheels_system(
     links: Query<&ChildOf>,
-    cars: Query<
-        (&Transform, &Velocity),
-        (With<CarBody>, Without<CarWheel>),
-    >,
+    cars: Query<(&Transform, &Velocity), (With<CarBody>, Without<CarWheel>)>,
     mut wheels: Query<(&ChildOf, &CarWheel, &mut Transform), With<CarWheel>>,
 ) {
     for (link, wheel, mut transform) in wheels.iter_mut() {

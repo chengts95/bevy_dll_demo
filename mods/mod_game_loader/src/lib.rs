@@ -1,8 +1,10 @@
 use bevy_app::App;
-use shared_api::{CarBody, CarWheel, Collider, Transform, Visual, Spin};
 use ecs_prefab::{Library, PrefabRegistry};
 use serde::Deserialize;
+use shared_api::{CarBody, CarWheel, Collider, Spin, Transform, Visual};
 use std::collections::HashMap;
+
+bevy_dll_mod_api::export_type_id_probes!();
 
 #[derive(Deserialize)]
 pub struct GameManifest {
@@ -25,7 +27,7 @@ pub unsafe extern "C" fn setup_mod(_app_ptr: *mut std::ffi::c_void) {}
 #[no_mangle]
 pub unsafe extern "C" fn load_case(app_ptr: *mut std::ffi::c_void) -> i32 {
     let app = unsafe { &mut *(app_ptr as *mut App) };
-    
+
     let game_path = std::env::var_os("BEVY_GAME_FILE")
         .map(std::path::PathBuf::from)
         .unwrap_or_else(|| std::path::PathBuf::from("game.json"));
@@ -40,26 +42,33 @@ pub unsafe extern "C" fn load_case(app_ptr: *mut std::ffi::c_void) -> i32 {
     let manifest: GameManifest = match serde_json::from_str(&data) {
         Ok(m) => m,
         Err(e) => {
-            eprintln!("Game Loader: Failed to parse {}: {}", game_path.display(), e);
+            eprintln!(
+                "Game Loader: Failed to parse {}: {}",
+                game_path.display(),
+                e
+            );
             return 2;
         }
     };
 
     let mut reg = PrefabRegistry::default();
     reg.register::<Transform>()
-       .register::<Visual>()
-       .register::<Spin>()
-       .register::<shared_api::Velocity>()
-       .register::<shared_api::Gravity>()
-       .register::<shared_api::PlayerControl>()
-       .register::<Collider>()
-       .register::<CarBody>()
-       .register::<CarWheel>();
+        .register::<Visual>()
+        .register::<Spin>()
+        .register::<shared_api::Velocity>()
+        .register::<shared_api::Gravity>()
+        .register::<shared_api::PlayerControl>()
+        .register::<Collider>()
+        .register::<CarBody>()
+        .register::<CarWheel>();
 
     let mut lib = Library::new();
 
     // 1. Fetch Global Prefabs from ModRunner
-    if let Some(mod_prefabs) = app.world_mut().remove_resource::<shared_api::AppModPrefabs>() {
+    if let Some(mod_prefabs) = app
+        .world_mut()
+        .remove_resource::<shared_api::AppModPrefabs>()
+    {
         for (name, class) in mod_prefabs.0 {
             lib.insert(name, class);
         }
@@ -86,13 +95,19 @@ pub unsafe extern "C" fn load_case(app_ptr: *mut std::ffi::c_void) -> i32 {
             &instance.prefab,
             &instance.params,
             &format!("{}.", instance.id),
-            world
+            world,
         ) {
-            eprintln!("Game Loader: Failed to spawn instance '{}': {}", instance.id, e);
+            eprintln!(
+                "Game Loader: Failed to spawn instance '{}': {}",
+                instance.id, e
+            );
             return 4;
         }
     }
 
-    println!("Game Loader: Successfully spawned {} instances via ecs_prefab!", manifest.instances.len());
+    println!(
+        "Game Loader: Successfully spawned {} instances via ecs_prefab!",
+        manifest.instances.len()
+    );
     0
 }

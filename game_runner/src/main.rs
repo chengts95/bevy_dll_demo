@@ -1,4 +1,8 @@
 use bevy_app::App;
+use bevy_dll_mod_api::{
+    check_owned_type_id_probes, TypeIdProbeAbiVersionFn, TypeIdProbesFn,
+    TYPE_ID_PROBE_ABI_VERSION, TYPE_ID_PROBE_ABI_VERSION_SYMBOL, TYPE_ID_PROBES_SYMBOL,
+};
 use ecs_prefab::Library;
 use serde::Deserialize;
 use std::path::{Path, PathBuf};
@@ -85,13 +89,6 @@ fn main() {
             }
         }
 
-        // Load DLL
-        let target_dir = if cfg!(debug_assertions) {
-            "debug"
-        } else {
-            "release"
-        };
-
         #[cfg(target_os = "windows")]
         let platform_cfg = manifest
             .platform
@@ -105,7 +102,7 @@ fn main() {
             .as_ref()
             .expect("Missing [platform.linux] in mod.toml");
 
-        let dll_name = if target_dir == "debug" {
+        let dll_name = if cfg!(debug_assertions) {
             &platform_cfg.dll_path_debug
         } else {
             &platform_cfg.dll_path_release
@@ -116,6 +113,10 @@ fn main() {
 
         match unsafe { libloading::Library::new(&dll_path) } {
             Ok(lib) => {
+                if let Err(err) = check_mod_abi(&lib) {
+                    eprintln!("Failed ABI check for {}: {}", dll_path.display(), err);
+                    continue;
+                }
                 if let Ok(setup) =
                     unsafe { lib.get::<unsafe extern "C" fn(*mut std::ffi::c_void)>(b"setup_mod") }
                 {
@@ -144,4 +145,23 @@ fn main() {
 
     app.run();
     std::mem::forget(loaded_libs);
+}
+
+fn check_mod_abi(lib: &libloading::Library) -> Result<(), Box<dyn std::error::Error>> {
+    let version = unsafe {
+        lib.get::<TypeIdProbeAbiVersionFn>(TYPE_ID_PROBE_ABI_VERSION_SYMBOL)?
+    };
+    let version = unsafe { version() };
+    if version != TYPE_ID_PROBE_ABI_VERSION {
+        return Err(format!(
+            "unsupported TypeId probe ABI version: expected {}, got {}",
+            TYPE_ID_PROBE_ABI_VERSION, version
+        )
+        .into());
+    }
+
+    let probes = unsafe { lib.get::<TypeIdProbesFn>(TYPE_ID_PROBES_SYMBOL)? };
+    let probes = unsafe { probes().to_owned_vec()? };
+    check_owned_type_id_probes(&bevy_dll_mod_api::bevy_type_id_probes(), &probes)?;
+    Ok(())
 }

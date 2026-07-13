@@ -2,6 +2,8 @@ use bevy_app::{App, Update};
 use bevy_ecs::prelude::*;
 use shared_api::{GameLogicSet, InputState, PlayerControl, Velocity};
 
+bevy_dll_mod_api::export_type_id_probes!();
+
 #[no_mangle]
 pub unsafe extern "C" fn setup_mod(app_ptr: *mut std::ffi::c_void) {
     let app = &mut *(app_ptr as *mut App);

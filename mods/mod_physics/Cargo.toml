@@ -10,3 +10,4 @@ crate-type = ["cdylib", "rlib"]
 bevy_app.workspace = true
 bevy_ecs.workspace = true
 shared_api.workspace = true
+bevy_dll_mod_api.workspace = true

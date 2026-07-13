@@ -2,7 +2,6 @@ use appcui::prelude::*;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-
 include!("types.rs");
 include!("app.rs");
 include!("ui.rs");

@@ -1,15 +1,21 @@
 #!/bin/bash
 set -e
 
-echo "==> Building Release Workspace..."
-cargo build --release
-
 CARGO_TARGET_DIR=$(cargo metadata --no-deps --format-version 1 | sed -n 's/.*"target_directory":"\([^"]*\)".*/\1/p')
 TARGET_DIR="$CARGO_TARGET_DIR/release"
+echo "==> Using existing release artifacts from $TARGET_DIR"
 
 echo "==> Assembling release_package..."
 rm -rf release_package
 mkdir -p release_package/mods
+
+for bin in game_runner launcher; do
+    if [[ ! -x "$TARGET_DIR/$bin" ]]; then
+        echo "Missing release binary: $TARGET_DIR/$bin" >&2
+        echo "Build it first with: cargo build --release" >&2
+        exit 1
+    fi
+done
 
 cp "$TARGET_DIR/game_runner" release_package/
 cp "$TARGET_DIR/launcher" release_package/
@@ -17,6 +23,7 @@ cp game.json release_package/
 cp -R playsets release_package/
 
 cat << 'EOF' > release_package/launcher.toml
+start_in = "."
 runner_cmd = "./game_runner"
 EOF
 
@@ -42,6 +49,11 @@ for desc in $DESCRIPTORS; do
     
     # Copy the compiled .so from target dir directly to the release package!
     SOURCE_DLL="$TARGET_DIR/lib${CRATE_NAME}.so"
+    if [[ ! -f "$SOURCE_DLL" ]]; then
+        echo "Missing release DLL for $CRATE_NAME: $SOURCE_DLL" >&2
+        echo "Build it first with: cargo build --release" >&2
+        exit 1
+    fi
     echo "  -> Packaging $CRATE_NAME..."
     cp "$SOURCE_DLL" "$DEPLOY_DIR/$DLL_TARGET"
 

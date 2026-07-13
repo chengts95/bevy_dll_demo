@@ -8,6 +8,7 @@ bevy_app.workspace = true
 bevy_ecs.workspace = true
 shared_api.workspace = true
 ecs_prefab.workspace = true
+bevy_dll_mod_api.workspace = true
 libloading = "0.8"
 toml = "0.8"
 serde = { version = "1.0", features = ["derive"] }

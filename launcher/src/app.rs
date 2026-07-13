@@ -20,7 +20,12 @@ struct LauncherWindow {
 
 impl LauncherWindow {
     fn new() -> Self {
-        let root = app_root();
+        let config_root = app_root();
+        let launcher_config = match fs::read_to_string(config_root.join("launcher.toml")) {
+            Ok(content) => toml::from_str(&content).unwrap_or_default(),
+            Err(_) => LauncherToml::default(),
+        };
+        let root = resolve_path(&config_root, Path::new(&launcher_config.start_in));
         let (mods_data, startup_message) = match scan_mods(&root) {
             Ok(mods) if mods.is_empty() => (
                 mods,
@@ -36,11 +41,6 @@ impl LauncherWindow {
                 )
             }
             Err(err) => (Vec::new(), format!("Failed to scan mod.toml files: {err}")),
-        };
-
-        let launcher_config = match fs::read_to_string(app_root().join("launcher.toml")) {
-            Ok(content) => toml::from_str(&content).unwrap_or_default(),
-            Err(_) => LauncherToml::default(),
         };
 
         let mut win = Self {

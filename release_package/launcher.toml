@@ -1,1 +1,2 @@
+start_in = "."
 runner_cmd = "./game_runner"

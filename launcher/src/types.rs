@@ -139,8 +139,14 @@ impl ModEntry {
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 pub struct LauncherToml {
+    #[serde(default = "default_start_in")]
+    pub start_in: String,
     #[serde(default = "default_runner_cmd")]
     pub runner_cmd: String,
+}
+
+fn default_start_in() -> String {
+    ".".to_string()
 }
 
 fn default_runner_cmd() -> String {
@@ -150,6 +156,7 @@ fn default_runner_cmd() -> String {
 impl Default for LauncherToml {
     fn default() -> Self {
         Self {
+            start_in: default_start_in(),
             runner_cmd: default_runner_cmd(),
         }
     }

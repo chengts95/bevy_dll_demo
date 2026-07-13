@@ -1,6 +1,8 @@
 use bevy_app::{App, AppExit, Update};
 use bevy_ecs::prelude::*;
-use shared_api::{GameLogicSet, RenderSet, MainThreadMarker, Transform, Visual};
+use shared_api::{GameLogicSet, MainThreadMarker, RenderSet, Transform, Visual};
+
+bevy_dll_mod_api::export_type_id_probes!();
 
 pub struct WindowResource {
     pub window: minifb::Window,
@@ -15,13 +17,14 @@ pub unsafe extern "C" fn setup_mod(app_ptr: *mut std::ffi::c_void) {
     let app = &mut *(app_ptr as *mut App);
 
     app.insert_non_send(MainThreadMarker);
-    
+
     let mut window = minifb::Window::new(
         "Bevy ECS Canvas Demo (Strict Schedule)",
         800,
         600,
         minifb::WindowOptions::default(),
-    ).unwrap();
+    )
+    .unwrap();
     window.set_target_fps(60);
 
     app.insert_non_send(WindowResource { window });
@@ -39,7 +42,8 @@ pub unsafe extern "C" fn setup_mod(app_ptr: *mut std::ffi::c_void) {
             RenderSet::Clear,
             RenderSet::DrawOpaque,
             RenderSet::DrawUI,
-        ).chain()
+        )
+            .chain(),
     );
 
     app.add_systems(Update, clear_canvas_system.in_set(RenderSet::Clear));
@@ -50,7 +54,7 @@ pub unsafe extern "C" fn setup_mod(app_ptr: *mut std::ffi::c_void) {
     app.set_runner(|mut app| {
         loop {
             app.update();
-            
+
             // 检查窗口是否关闭
             let window_res = app.world().non_send::<WindowResource>();
             if !window_res.window.is_open() || window_res.window.is_key_down(minifb::Key::Escape) {
@@ -62,13 +66,12 @@ pub unsafe extern "C" fn setup_mod(app_ptr: *mut std::ffi::c_void) {
 }
 
 fn clear_canvas_system(mut canvas: NonSendMut<CanvasResource>) {
-    canvas.pixmap.fill(tiny_skia::Color::from_rgba8(40, 45, 50, 255));
+    canvas
+        .pixmap
+        .fill(tiny_skia::Color::from_rgba8(40, 45, 50, 255));
 }
 
-fn draw_opaque_system(
-    mut canvas: NonSendMut<CanvasResource>,
-    query: Query<(&Transform, &Visual)>,
-) {
+fn draw_opaque_system(mut canvas: NonSendMut<CanvasResource>, query: Query<(&Transform, &Visual)>) {
     for (transform, visual) in query.iter() {
         let mut paint = tiny_skia::Paint::default();
         paint.set_color_rgba8(
@@ -85,27 +88,37 @@ fn draw_opaque_system(
             -transform.size[0] / 2.0,
             -transform.size[1] / 2.0,
             transform.size[0],
-            transform.size[1]
-        ).unwrap();
+            transform.size[1],
+        )
+        .unwrap();
 
         canvas.pixmap.fill_rect(rect, &paint, ts, None);
     }
 }
 
-fn present_window_system(mut window_res: NonSendMut<WindowResource>, canvas: NonSend<CanvasResource>, mut input: ResMut<shared_api::InputState>) {
+fn present_window_system(
+    mut window_res: NonSendMut<WindowResource>,
+    canvas: NonSend<CanvasResource>,
+    mut input: ResMut<shared_api::InputState>,
+) {
     let window = &mut window_res.window;
-    
+
     input.left_down = window.is_key_down(minifb::Key::Left);
     input.right_down = window.is_key_down(minifb::Key::Right);
     let keys = window.get_keys_pressed(minifb::KeyRepeat::No);
     input.space_pressed = keys.contains(&minifb::Key::Space);
 
-    let buffer: Vec<u32> = canvas.pixmap.pixels().iter().map(|p| {
-        let r = p.red() as u32;
-        let g = p.green() as u32;
-        let b = p.blue() as u32;
-        (r << 16) | (g << 8) | b
-    }).collect();
+    let buffer: Vec<u32> = canvas
+        .pixmap
+        .pixels()
+        .iter()
+        .map(|p| {
+            let r = p.red() as u32;
+            let g = p.green() as u32;
+            let b = p.blue() as u32;
+            (r << 16) | (g << 8) | b
+        })
+        .collect();
 
     window.update_with_buffer(&buffer, 800, 600).unwrap();
 }
