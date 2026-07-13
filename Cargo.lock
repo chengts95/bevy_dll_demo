@@ -1338,6 +1338,7 @@ dependencies = [
  "bevy_ecs",
  "ecs_prefab",
  "libloading",
+ "rmp-serde",
  "serde",
  "serde_json",
  "shared_api",

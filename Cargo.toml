@@ -4,6 +4,7 @@ members = [
     "host",
     "game_runner",
     "shared_api",
+    "libs/bevy_dll_mod_api",
     "mods/mod_canvas", "mods/mod_vello",
     "mods/mod_block",
     "mods/mod_game_loader", "mods/mod_physics", "mods/mod_player", "mods/mod_car",
@@ -15,7 +16,7 @@ bevy_app = { path = "libs/bevy_base/bevy_app" }
 bevy_ecs = { path = "libs/bevy_base/bevy_ecs" }
 shared_api = { path = "shared_api" }
 ecs_prefab = { path = "libs/ecs_prefab" }
-bevy_dll_mod_api = { path = "../bevy_dll_mod/bevy_dll_mod_api" }
+bevy_dll_mod_api = { path = "libs/bevy_dll_mod_api" }
 
 [patch.crates-io]
 bevy_ecs = { path = "libs/bevy_base/bevy_ecs" }

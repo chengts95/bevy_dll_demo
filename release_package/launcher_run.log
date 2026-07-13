@@ -6,8 +6,9 @@ Game Runner: Loading Mod 'Physics Engine'
 Game Runner: Loading Mod 'Game Loader'
 Game Runner: Loading Mod 'Player Controller'
 Game Runner: Loading Mod 'Canvas Renderer'
+Game Runner: Loading Mod 'Car Visuals'
 Game Loader: Successfully spawned 3 instances via ecs_prefab!
-warning: queue 0x55a74b582f50 destroyed while proxies still attached:
+warning: queue 0x55f69f6ef380 destroyed while proxies still attached:
   wl_buffer#21 still attached
   wl_buffer#20 still attached
   wl_shm_pool#19 still attached
