@@ -16,7 +16,7 @@ use crate::{
     error::{ErrorContext, ErrorHandler, Result},
     prelude::Resource,
     schedule::{
-        is_apply_deferred, ConditionWithAccess, SystemExecutor, SystemSchedule, SystemWithAccess,
+        ConditionWithAccess, SystemExecutor, SystemSchedule, SystemWithAccess,
     },
     system::{RunSystemError, ScheduleSystem},
     world::{unsafe_world_cell::UnsafeWorldCell, World},
@@ -693,11 +693,13 @@ impl ExecutorState {
     /// Caller must ensure no systems are currently borrowed.
     unsafe fn spawn_exclusive_system_task(&mut self, context: &Context, system_index: usize) {
         // SAFETY: this system is not running, no other reference exists
-        let system = &mut unsafe { &mut *context.environment.systems[system_index].get() }.system;
+        let system_with_access = unsafe { &mut *context.environment.systems[system_index].get() };
+        let is_apply_deferred = system_with_access.is_apply_deferred;
+        let system = &mut system_with_access.system;
         // Move the full context object into the new future.
         let context = *context;
 
-        if is_apply_deferred(&**system) {
+        if is_apply_deferred {
             // TODO: avoid allocation
             let unapplied_systems = self.unapplied_systems.clone();
             self.unapplied_systems.clear();

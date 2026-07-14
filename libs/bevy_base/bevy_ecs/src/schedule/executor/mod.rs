@@ -381,6 +381,23 @@ mod tests {
         assert!(state.populated_ran);
     }
 
+    #[test]
+    fn single_threaded_executor_does_not_recompute_type_ids_while_running() {
+        let mut world = World::new();
+        let mut schedule = Schedule::default();
+        schedule.set_executor(SingleThreadedExecutor::new());
+        schedule.add_systems(|| {});
+
+        schedule.run(&mut world);
+        crate::stable_typeid::reset_call_count();
+
+        for _ in 0..8 {
+            schedule.run(&mut world);
+        }
+
+        assert_eq!(crate::stable_typeid::call_count(), 0);
+    }
+
     fn look_for_missing_resource(_res: Res<TestState>) {}
 
     #[test]

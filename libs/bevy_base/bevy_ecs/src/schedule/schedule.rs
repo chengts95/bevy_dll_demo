@@ -34,11 +34,12 @@ use tracing::info_span;
 use crate::{change_detection::CheckChangeTicks, system::System};
 use crate::{
     component::{ComponentId, Components},
+    error::FallbackErrorHandler,
     prelude::Component,
     resource::Resource,
     schedule::*,
     system::ScheduleSystem,
-    world::World,
+    world::{World, WorldId},
 };
 
 pub use stepping::Stepping;
@@ -388,6 +389,8 @@ pub struct Schedule {
     executable: SystemSchedule,
     executor: Box<dyn SystemExecutor>,
     executor_initialized: bool,
+    fallback_error_handler_type_id: TypeId,
+    fallback_error_handler_id: Option<(WorldId, ComponentId)>,
 }
 
 #[derive(ScheduleLabel, Hash, PartialEq, Eq, Debug, Clone)]
@@ -412,6 +415,8 @@ impl Schedule {
             executable: SystemSchedule::new(),
             executor: default_executor(),
             executor_initialized: false,
+            fallback_error_handler_type_id: TypeId::of::<FallbackErrorHandler>(),
+            fallback_error_handler_id: None,
         };
         // Call `set_build_settings` to add any default build passes
         this.set_build_settings(Default::default());
@@ -573,7 +578,23 @@ impl Schedule {
             )
         });
 
-        let error_handler = world.fallback_error_handler();
+        let error_handler_id = match self.fallback_error_handler_id {
+            Some((world_id, component_id)) if world_id == world.id() => Some(component_id),
+            _ => {
+                let component_id = world
+                    .components()
+                    .get_id(self.fallback_error_handler_type_id);
+                self.fallback_error_handler_id =
+                    component_id.map(|component_id| (world.id(), component_id));
+                component_id
+            }
+        };
+        let error_handler = error_handler_id
+            .and_then(|component_id| world.get_resource_by_id(component_id))
+            // SAFETY: The cached component ID came from `FallbackErrorHandler` registration.
+            .map(|ptr| unsafe { *ptr.deref::<FallbackErrorHandler>() })
+            .unwrap_or_default()
+            .0;
 
         #[cfg(not(feature = "bevy_debug_stepping"))]
         self.executor
@@ -657,7 +678,7 @@ impl Schedule {
     /// This prevents overflow and thus prevents false positives.
     pub fn check_change_ticks(&mut self, check: CheckChangeTicks) {
         for system in &mut self.executable.systems {
-            if !is_apply_deferred(system) {
+            if !system.is_apply_deferred {
                 system.check_change_tick(check);
             }
         }

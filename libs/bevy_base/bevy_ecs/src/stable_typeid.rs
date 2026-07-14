@@ -3,6 +3,11 @@
 use core::any::type_name;
 use core::hash::Hasher;
 
+#[cfg(test)]
+std::thread_local! {
+    static TYPE_ID_CALLS: core::cell::Cell<usize> = const { core::cell::Cell::new(0) };
+}
+
 /// A stable hash of a Rust type name.
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
@@ -12,8 +17,20 @@ impl TypeId {
     /// Returns the stable identifier for `T`.
     #[inline(always)]
     pub fn of<T: ?Sized + 'static>() -> Self {
+        #[cfg(test)]
+        TYPE_ID_CALLS.set(TYPE_ID_CALLS.get() + 1);
         Self(fnv1a_64(type_name::<T>()))
     }
+}
+
+#[cfg(test)]
+pub(crate) fn reset_call_count() {
+    TYPE_ID_CALLS.set(0);
+}
+
+#[cfg(test)]
+pub(crate) fn call_count() -> usize {
+    TYPE_ID_CALLS.get()
 }
 
 impl core::fmt::Debug for TypeId {

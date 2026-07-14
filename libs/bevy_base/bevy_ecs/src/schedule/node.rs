@@ -22,7 +22,7 @@ use crate::{
             Direction::{self, Incoming, Outgoing},
             GraphNodeId, UnGraph,
         },
-        BoxedCondition, InternedSystemSet, ScheduleGraph,
+        is_apply_deferred, BoxedCondition, InternedSystemSet, ScheduleGraph,
     },
     system::{ReadOnlySystem, RunSystemError, ScheduleSystem, System, SystemStateFlags},
     world::{unsafe_world_cell::UnsafeWorldCell, DeferredWorld, World},
@@ -37,6 +37,10 @@ pub(crate) struct SystemNode {
 pub struct SystemWithAccess {
     /// The system itself.
     pub(crate) system: ScheduleSystem,
+    /// The stable system type, computed once when the schedule is built.
+    system_type: TypeId,
+    /// Whether this is the special [`ApplyDeferred`](crate::schedule::ApplyDeferred) system.
+    pub(crate) is_apply_deferred: bool,
     /// The access returned by [`System::initialize`].
     /// This will be empty if the system has not been initialized yet.
     pub(crate) access: FilteredAccessSet,
@@ -46,8 +50,12 @@ impl SystemWithAccess {
     /// Constructs a new [`SystemWithAccess`] from a [`ScheduleSystem`].
     /// The `access` will initially be empty.
     pub fn new(system: ScheduleSystem) -> Self {
+        let system_type = system.system_type();
+        let is_apply_deferred = is_apply_deferred(&*system);
         Self {
             system,
+            system_type,
+            is_apply_deferred,
             access: FilteredAccessSet::new(),
         }
     }
@@ -69,7 +77,7 @@ impl System for SystemWithAccess {
 
     #[inline]
     fn system_type(&self) -> TypeId {
-        self.system.system_type()
+        self.system_type
     }
 
     #[inline]

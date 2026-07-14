@@ -11,7 +11,7 @@ use std::eprintln;
 
 use crate::{
     error::{ErrorContext, ErrorHandler},
-    schedule::{is_apply_deferred, ConditionWithAccess, SystemExecutor, SystemSchedule},
+    schedule::{ConditionWithAccess, SystemExecutor, SystemSchedule},
     system::{RunSystemError, ScheduleSystem},
     world::World,
 };
@@ -69,6 +69,7 @@ impl SystemExecutor for SingleThreadedExecutor {
             .unwrap_or_default();
 
         for system_index in 0..schedule.systems.len() {
+            let is_apply_deferred = schedule.systems[system_index].is_apply_deferred;
             let system = &mut schedule.systems[system_index].system;
 
             #[cfg(feature = "trace")]
@@ -126,7 +127,7 @@ impl SystemExecutor for SingleThreadedExecutor {
                 continue;
             }
 
-            if is_apply_deferred(&**system) {
+            if is_apply_deferred {
                 self.apply_deferred(schedule, world);
                 continue;
             }
