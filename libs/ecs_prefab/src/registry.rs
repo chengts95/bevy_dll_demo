@@ -11,13 +11,13 @@ use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
-use crate::bind::PrefabEntityId;
+use crate::bind::{NameTag, PrefabEntityId, Refs};
 use crate::format::{EntityRecord, Local, Net, Pins, PrefabClass, Snapshot, Use};
 use crate::subst::{is_param_symbol, lookup_param_path, param_name, try_resolve_globals};
 
 use bevy_archive::bevy_registry::SnapshotRegistry;
 
-const PREFAB_DATA_COMPONENTS: &[&str] = &["Use", "Local", "Net", "Pins"];
+const PREFAB_DATA_COMPONENTS: &[&str] = &["Use", "Local", "Net", "Pins", "Refs", "NameTag"];
 const STRUCTURAL_COMPONENTS: &[&str] = &["ChildOf"];
 
 // ── registry ────────────────────────────────────────────────────────────────
@@ -115,6 +115,8 @@ impl PrefabRegistry {
         self.register_prefab_component::<Local>();
         self.register_prefab_component::<Net>();
         self.register_prefab_component::<Pins>();
+        self.register_prefab_component::<Refs>();
+        self.register_prefab_component::<NameTag>();
         self.drop_structural_components();
     }
 
