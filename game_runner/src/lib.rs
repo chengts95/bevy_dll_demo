@@ -80,7 +80,12 @@ impl GameRunner {
         let mut app = hooks.build_app();
         let mut loaded_libs = Vec::new();
 
-        load_playset(&mut app, &mut loaded_libs, hooks, &options.playset_path)?;
+        if let Err(error) = load_playset(&mut app, &mut loaded_libs, hooks, &options.playset_path) {
+            // ECS component destructors can live in the loaded DLLs.
+            drop(app);
+            drop(loaded_libs);
+            return Err(error);
+        }
 
         Ok(Self { app, loaded_libs })
     }
@@ -316,7 +321,7 @@ fn load_cases(app: &mut App, loaded_libs: &[libloading::Library]) -> RunnerResul
         {
             let code = unsafe { load_case(app as *mut _ as *mut std::ffi::c_void) };
             if code != 0 {
-                eprintln!("Game Loader failed with code {}", code);
+                return Err(format!("Game Loader failed with code {code}").into());
             }
         }
     }
