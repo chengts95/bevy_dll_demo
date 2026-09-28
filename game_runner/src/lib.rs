@@ -44,6 +44,9 @@ pub struct RunnerModResource {
 }
 
 pub trait RunnerHooks {
+    fn case_load_error(&mut self, _app: &App, code: i32) -> String {
+        format!("Game Loader failed with code {code}")
+    }
     fn build_app(&mut self) -> App {
         App::new()
     }
@@ -177,7 +180,7 @@ fn load_playset(
     }
 
     hooks.insert_mod_resources(app, mod_prefabs, mod_resources)?;
-    load_cases(app, loaded_libs)?;
+    load_cases(app, loaded_libs, hooks)?;
 
     Ok(())
 }
@@ -314,14 +317,18 @@ fn resolve_mod_dll(mod_dir: &Path, manifest: &ModManifest) -> RunnerResult<PathB
     Ok(mod_dir.join(dll_name))
 }
 
-fn load_cases(app: &mut App, loaded_libs: &[libloading::Library]) -> RunnerResult<()> {
+fn load_cases(
+    app: &mut App,
+    loaded_libs: &[libloading::Library],
+    hooks: &mut impl RunnerHooks,
+) -> RunnerResult<()> {
     for lib in loaded_libs {
         if let Ok(load_case) =
             unsafe { lib.get::<unsafe extern "C" fn(*mut std::ffi::c_void) -> i32>(b"load_case") }
         {
             let code = unsafe { load_case(app as *mut _ as *mut std::ffi::c_void) };
             if code != 0 {
-                return Err(format!("Game Loader failed with code {code}").into());
+                return Err(hooks.case_load_error(app, code).into());
             }
         }
     }
