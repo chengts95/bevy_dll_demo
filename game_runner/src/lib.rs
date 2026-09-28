@@ -1,7 +1,7 @@
 use bevy_app::{App, AppExit};
 use bevy_dll_mod_api::{
-    check_owned_type_id_probes, TypeIdProbeAbiVersionFn, TypeIdProbeError, TypeIdProbesFn,
-    TYPE_ID_PROBES_SYMBOL, TYPE_ID_PROBE_ABI_VERSION, TYPE_ID_PROBE_ABI_VERSION_SYMBOL,
+    TYPE_ID_PROBE_ABI_VERSION, TYPE_ID_PROBE_ABI_VERSION_SYMBOL, TYPE_ID_PROBES_SYMBOL,
+    TypeIdProbeAbiVersionFn, TypeIdProbeError, TypeIdProbesFn, check_owned_type_id_probes,
 };
 use ecs_prefab::Library;
 use serde::Deserialize;
@@ -362,9 +362,5 @@ fn check_mod_abi(lib: &libloading::Library) -> RunnerResult<()> {
 }
 
 fn debug_profile_name(value: u64) -> &'static str {
-    if value == 1 {
-        "debug"
-    } else {
-        "release"
-    }
+    if value == 1 { "debug" } else { "release" }
 }
